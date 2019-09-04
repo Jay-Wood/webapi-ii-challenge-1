@@ -65,15 +65,18 @@ server.delete("/api/posts/:id", (req, res) => {
 server.post("/api/posts/:id/comments", (req, res) => {
     const id = req.params.id;
     const comment = req.body;
-    db.insertComment(comment)
-        .then( comment => {
-            if(!id) {
+    console.log("REQ.BODY: ", comment)
+
+    db.findById(id)
+        .then( post => {
+            if(post.length === 0) {
                 res.status(404).json({ message: "The post with the specified ID does not exist." })     
-            }
-            if(!comment.text) {
+            } else if(!comment.text) {
                 res.status(400).json( {errorMessage: "Please provide text for the comment."} )
             } else {
-                res.status(201).json(comment)
+                db.insertComment(comment).then(comm => {
+                    res.status(201).json(comm)
+                })
             }
         })
         .catch( () => {
